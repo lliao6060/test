@@ -17,6 +17,20 @@
       </div>
     </div>
     <div class="w-100 col">
+      <p
+        v-if="selectOrders.length > 0" 
+        class="text-right"
+      >
+        已選取 {{ selectOrders.length }} 筆訂單，是否要更改狀態為已取消？
+        <el-button 
+          size="mini"
+          @click="changeOrderState"
+        >是</el-button>
+        <el-button 
+          type="danger" 
+          size="mini"
+        >否</el-button>
+      </p>
       <el-card 
         v-if="nowOrderStatus === 0 || nowOrderStatus === 1"
         class="order-card" 
@@ -24,25 +38,39 @@
         <div slot="header" class="clearfix order-card__header">
           <span>進行中</span>
         </div>
-        <div 
-          v-for="(orderItem,index) in inProgressOrders" 
-          :key="`orderItem.date${index}`"
-          class="row no-gutters sub-order-card"
-        >
-          <div class="col-2 img-box">
-            <img :src="orderItem.logo" />
+        <div v-if="inProgressOrders.length > 0">
+          <div 
+            v-for="(orderItem,index) in inProgressOrders" 
+            :key="`orderItem.date${index}`"
+            class="row no-gutters sub-order-card"
+          >
+            <input 
+              type="checkbox" 
+              v-model="selectOrders"
+              :id="`orderItem${index}`"
+              :value="orderItem"
+            />
+            <label 
+              :for="`orderItem${index}`" 
+              class="w-100 d-flex"
+            >
+              <div class="col-2 img-box">
+                <img :src="orderItem.logo" />
+              </div>
+              <div class="col-9 sub-order-card__content">
+                <div class="sub-order-card__content--header">
+                  <p :class="[statusTextClass[orderItem.status.code-1]]">{{ orderItem.status.type }}</p>
+                  <p>預計出貨: {{ orderItem.date }}</p>
+                </div>
+                <div class="sub-order-card__content--product-intro">{{ orderItem.name }}</div>
+              </div>
+              <span class="sub-order-card__content--check-detail-btn">
+                <i class="el-icon-arrow-right"></i>
+              </span>
+            </label>
           </div>
-          <div class="col-9 sub-order-card__content">
-            <div class="sub-order-card__content--header">
-              <p :class="[statusTextClass[orderItem.status.code-1]]">{{ orderItem.status.type }}</p>
-              <p>預計出貨: {{ orderItem.date }}</p>
-            </div>
-            <div class="sub-order-card__content--product-intro">{{ orderItem.name }}</div>
-          </div>
-          <span class="sub-order-card__content--check-detail-btn">
-            <i class="el-icon-arrow-right"></i>
-          </span>
         </div>
+        <div v-else>暫無資料</div>
       </el-card>
 
       <el-card 
@@ -52,25 +80,28 @@
         <div slot="header" class="clearfix order-card__header">
           <span>已完成</span>
         </div>
-        <div 
-          v-for="(orderItem,index) in isComplate" 
-          :key="`orderItem.date${index}`"
-          class="row no-gutters sub-order-card"
-        >
-          <div class="col-2 img-box">
-            <img :src="orderItem.logo" />
-          </div>
-          <div class="col-9 sub-order-card__content">
-            <div class="sub-order-card__content--header">
-              <p :class="[statusTextClass[orderItem.status.code-1]]">{{ orderItem.status.type }}</p>
-              <p>預計出貨: {{ orderItem.date }}</p>
+        <div v-if="isComplate.length > 0">
+          <div 
+            v-for="(orderItem,index) in isComplate" 
+            :key="`orderItem.date${index}`"
+            class="row no-gutters sub-order-card"
+          >
+            <div class="col-2 img-box">
+              <img :src="orderItem.logo" />
             </div>
-            <div class="sub-order-card__content--product-intro">{{ orderItem.name }}</div>
+            <div class="col-9 sub-order-card__content">
+              <div class="sub-order-card__content--header">
+                <!-- <p :class="[statusTextClass[orderItem.status]]"></p> -->
+                <p>預計出貨: {{ orderItem.date }}</p>
+              </div>
+              <div class="sub-order-card__content--product-intro">{{ orderItem.name }}</div>
+            </div>
+            <span class="sub-order-card__content--check-detail-btn">
+              <i class="el-icon-arrow-right"></i>
+            </span>
           </div>
-          <span class="sub-order-card__content--check-detail-btn">
-            <i class="el-icon-arrow-right"></i>
-          </span>
         </div>
+        <div v-else>暫無資料</div>
       </el-card>
     </div>
   </div>
@@ -81,32 +112,58 @@ export default {
   name: 'OrderControl',
   props: {
     data: {
-      type: Object,
-      default: () => {},
+      type: Array,
+      default: () => [],
     },
   },
   data() {
     return {
       options: [0, 1, 2],
+      nowOrderStatus: 0,
+      selectOrders: [],
+
+      //config
+      orderStatusText: ['處理中','已成立','已取消','已送達'],
       statusText: ['全選', '進行中', '已完成'],
       statusTextClass: ['success', 'success', 'deliveryOrCancelled', 'deliveryOrCancelled'],
-      nowOrderStatus: 0,
     };
   },
   computed: {
     inProgressOrders() {
       const vm = this;
-      const result = vm.data.orders.filter(function (order) {
+      const result = vm.data.filter(function (order) {
         return order.status.code === 1 || order.status.code === 2;
       })
       return result;
     },
     isComplate() {
       const vm = this;
-      const result = vm.data.orders.filter(function (order) {
+      const result = vm.data.filter(function (order) {
         return order.status.code === 3 || order.status.code === 4;
       })
       return result;
+    },
+  },
+  methods: {
+    changeOrderState() {
+      const vm = this;
+      const targetOrders = vm.selectOrders.map(function(order) {
+        return {
+          name: order.name,
+          logo: order.logo,
+          status: {
+            code: 3,
+            type: '已取消'
+          },
+          date: order.date,
+        };
+      });
+      vm.selectOrders.forEach(function(order) {
+        const orderIndex = vm.data.indexOf(order);
+        vm.data.splice(orderIndex, 1);
+      })
+      vm.selectOrders = [];
+      vm.data = [...vm.data, ...targetOrders]
     },
   },
 }

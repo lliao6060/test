@@ -7,8 +7,8 @@
       class="dynamic-add-order-form"
     >
       <el-form-item
-        v-for="(domain, index) in dynamicValidateForm.orders"
-        :key="domain.key"
+        v-for="(orderItem, index) in dynamicValidateForm.orders"
+        :key="orderItem.key"
       >
         <el-form-item 
           label="商品名稱"  
@@ -17,17 +17,17 @@
           class="mb-4"
         >
           <el-col :span="20">
-            <el-input v-model="domain.name"></el-input>
+            <el-input v-model="orderItem.name"></el-input>
           </el-col>
           <el-col :span="4">
             <el-button 
               v-if="index === 0"
-              @click="addDomain"
+              @click="addOrder"
             >新增</el-button>
 
             <el-button 
               v-else
-              @click.prevent="removeDomain(domain)"
+              @click.prevent="removeOrder(orderItem)"
             >删除</el-button>
           </el-col>
         </el-form-item>
@@ -38,42 +38,47 @@
           :rules="{ required: true, message: '圖示連結不可為空', trigger: 'blur'}"
           class="mb-4"
         >
-          <el-input v-model="domain.imgUrl"></el-input>
+          <el-input v-model="orderItem.imgUrl"></el-input>
         </el-form-item>
 
         <el-form-item 
           label="訂單狀態"   
           :prop="'orders.' + index + '.status'"        
           :rules="{ required: true, message: '訂單狀態不可為空', trigger: 'change'}"
+          class="mb-4"
         >
           <el-select 
-            v-model="domain.status" 
-            class="w-100"
+            v-model="orderItem.status" 
             placeholder="請選擇訂單狀態"
+            class="w-100"
           >
-            <el-option 
-              v-for="statusItem in statusList"
-              :key="statusItem.code"
-              :labal="statusItem.type"
-              :value="statusItem.code"
+            <el-option
+              v-for="item in statusList"
+              :key="item.value"
+              :label="item.type"
+              :value="item.code"
             ></el-option>
           </el-select>
         </el-form-item>
-        {{ domain.status }}
         <el-form-item 
-          v-if="domain.status.code === 1 || domain.status.code === 2"
+          v-if="orderItem.status === 1 || orderItem.status === 2"
           label="預計出貨日" 
           :prop="'orders.' + index + '.shipDate'"         
           :rules="{ required: true, message: '出貨日期不可為空', trigger: 'blur'}"
           class="mb-4"
         >
-          <el-datepicker 
+          <el-date-picker 
             type="date" 
-            v-model="domain.shipDate"
-          ></el-datepicker>
+            v-model="orderItem.shipDate"
+            class="w-100"
+            placeholder="請選擇預計出貨日"
+            :picker-options="pickerOptions"
+            format="yyyy 年 MM 月 dd 日"
+            value-format="yyyy/MM/dd"
+          ></el-date-picker>
         </el-form-item>
-
       </el-form-item>
+
       <el-form-item>
         <el-button type="primary" @click="submitForm('dynamicValidateForm')">提交</el-button>
         <el-button @click="resetForm('dynamicValidateForm')">重置</el-button>
@@ -84,6 +89,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 export default {
   data() {
     return {
@@ -98,44 +104,75 @@ export default {
       statusList: [
         {
           code: 1,
-          type: '處理中',
-        },
+          type: '處理中'
+        }, 
         {
           code: 2,
-          type: '已成立',
-        },
+          type: '已成立'
+        }, 
         {
           code: 3,
-          type: '已取消',
-        },
+          type: '已取消'
+        }, 
         {
           code: 4,
-          type: '已送達',
+          type: '已送達'
         },
       ],
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now();
+        },
+      },
     };
   },
   methods: {
+    ...mapActions([
+      'updateOrderTab',
+      'updateNewOrderData',
+    ]),
     submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+      const vm = this;
+      vm.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!');
+          vm.addNewOrder();
         } else {
-          console.log('error submit!!');
+          vm.$message.error('請填寫未填寫表單!')
           return false;
         }
       });
     },
+    addNewOrder() {
+      const vm = this;
+      const newOrders = vm.dynamicValidateForm.orders.map(function(order) {
+        return {
+          name: order.name,
+          logo: order.imgUrl,
+          status: {
+            code: order.status,
+            type: vm.statusList[order.status-1].type
+          },
+          date: order.shipDate,
+        };
+      });
+      console.log(newOrders)
+      vm.updateNewOrderData(newOrders);
+      vm.$message.success('訂單新增成功!');
+      vm.updateOrderTab({
+        name: '訂單管理',
+        value: 'control',
+      })
+    },
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
-    removeDomain(item) {
+    removeOrder(item) {
       var index = this.dynamicValidateForm.orders.indexOf(item)
       if (index !== -1) {
         this.dynamicValidateForm.orders.splice(index, 1)
       }
     },
-    addDomain() {
+    addOrder() {
       this.dynamicValidateForm.orders.push({
         name: '',
         imgUrl: '',

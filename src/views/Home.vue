@@ -10,24 +10,25 @@
                 :key="`tabItem.value${index}`" 
                 @click="changeTab(tabItem)"
               >
-                <span :class="{ 'is-active' : tabItem.value === nowTab.value }">{{ tabItem.name }}</span>
+                <span :class="{ 'is-active' : tabItem.value === orderNowTab.value }">{{ tabItem.name }}</span>
               </li>
             </ul>
           </div>
         </div>
-        <div 
-          v-if="nowTab.value === 'control'" 
-          class="col box row no-gutters order-panel__right-section"
-        >
-          <order-control :data="orderList"/>
+        <div class="col box row no-gutters order-panel__right-section">
+          <order-control 
+            v-if="orderNowTab.value === 'control'" 
+            :data="orderList.orders"
+          />
+
+          <add-order v-if="orderNowTab.value === 'add'"/>
+
+          <order-search 
+            v-if="orderNowTab.value === 'search'" 
+            :data="orderList.orders"
+          />
         </div>
 
-        <div 
-          v-if="nowTab.value === 'add'"
-          class="col box row no-gutters order-panel__right-section"
-        >
-          <add-order />
-        </div>
       </div>
     </div>
   </div>
@@ -36,10 +37,13 @@
 <script>
   import OrderControl from './order/OrderControl.vue';
   import AddOrder from './order/AddOrder.vue';
+  import OrderSearch from './order/OrderSearch.vue';
+  import { mapState } from 'vuex';
   export default {
     components: {
       OrderControl,
       AddOrder,
+      OrderSearch,
     },
     data() {
       return {
@@ -96,16 +100,38 @@
             value: 'add',
           },
         ],
-        nowTab: {
-          name: '新增訂單',
-          value: 'add',
-        },
       };
     },
+    computed: {
+      ...mapState([
+        'newOrders',
+      ]),
+      orderNowTab: {
+        get() {
+          return this.$store.state.orderNowTab;
+        },
+        set(nV) {
+          this.$store.state.orderNowTab = nV;
+        }
+      },
+    },
+    watch: {
+      newOrders(nV) {
+        if(nV) {
+          this.updateOrderData();
+        }
+      }
+    },
     methods: {
+      updateOrderData() {
+        const vm = this;
+        vm.orderList = {
+          orders: [...vm.orderList.orders, ...vm.newOrders]
+        };
+      },
       changeTab(tabName) {
         const vm = this;
-        vm.nowTab = JSON.parse(JSON.stringify(tabName));
+        vm.orderNowTab = JSON.parse(JSON.stringify(tabName));
       },
     },
   }
