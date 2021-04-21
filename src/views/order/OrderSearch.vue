@@ -37,7 +37,8 @@ export default {
     filteredOrders() {
         const vm = this;
         const search = vm.search;
-        const result = vm.dataList.filter(function (order) {
+        const data = vm.dataList.length > 0 ? vm.dataList : vm.data;
+        const result = data.filter(function (order) {
         let name = !search || String(order.name).toLowerCase().includes(search.toLowerCase());
         let date = !search || order.date.toLowerCase().includes(search.toLowerCase());
         return name || date;
