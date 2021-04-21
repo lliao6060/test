@@ -1,21 +1,8 @@
 <template>
   <div>
     <div class="order-panel-wrapper conatiner">
-      <div class="order-panel row no-gutters">
-        <div class="col-3 box order-panel__left-section">
-          <div class="box order-tab-bar">
-            <ul class="order-tab-items">
-              <li 
-                v-for="(tabItem,index) in orderTabList" 
-                :key="`tabItem.value${index}`" 
-                @click="changeTab(tabItem)"
-              >
-                <span :class="{ 'is-active' : tabItem.value === orderNowTab.value }">{{ tabItem.name }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="col box row no-gutters order-panel__right-section">
+      <div class="order-panel">
+        <div class="box row no-gutters order-panel__content-panel">
           <order-control 
             v-if="orderNowTab.value === 'control'" 
             :data="orderList.orders"
@@ -29,8 +16,30 @@
           />
         </div>
 
+        <el-drawer
+          direction="ltr"
+          :visible.sync="orderTabDrawer"
+          :with-header="false"
+          size="20%"
+        >
+          <div class="box order-panel__tab-bar">
+            <div class="box order-tab-bar">
+              <ul class="order-tab-items">
+                <li 
+                  v-for="(tabItem,index) in orderTabList" 
+                  :key="`tabItem.value${index}`" 
+                  @click="changeTab(tabItem)"
+                >
+                  <span :class="{ 'is-active' : tabItem.value === orderNowTab.value }">{{ tabItem.name }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </el-drawer>
+
       </div>
     </div>
+
   </div>
 </template>
 
@@ -38,7 +47,7 @@
   import OrderControl from './order/OrderControl.vue';
   import AddOrder from './order/AddOrder.vue';
   import OrderSearch from './order/OrderSearch.vue';
-  import { mapState } from 'vuex';
+  import { mapActions, mapState } from 'vuex';
   export default {
     components: {
       OrderControl,
@@ -114,6 +123,14 @@
           this.$store.state.orderNowTab = nV;
         }
       },
+      orderTabDrawer: {
+        get() {
+          return this.$store.state.orderTabDrawer;
+        },
+        set(nV) {
+          this.$store.state.orderTabDrawer = nV;
+        }
+      },
     },
     watch: {
       newOrders(nV) {
@@ -123,6 +140,9 @@
       }
     },
     methods: {
+      ...mapActions([
+        'updateOrderTabDrawer',
+      ]),
       updateOrderData() {
         const vm = this;
         vm.orderList = {
@@ -132,6 +152,7 @@
       changeTab(tabName) {
         const vm = this;
         vm.orderNowTab = JSON.parse(JSON.stringify(tabName));
+        vm.updateOrderTabDrawer(false);
       },
     },
   }
@@ -148,12 +169,12 @@
     }
 
     .order-panel {
-      &__left-section {
+      &__tab-bar {
         .order-tab-bar {
           border: 1px solid #ddd;
 
           .order-tab-items {
-            height: 100%;
+            height: 100vh;
 
             >li {
               padding: 10px;
@@ -177,9 +198,6 @@
             }
           }
         }
-      }
-
-      &__right-section {
       }
     }
   }

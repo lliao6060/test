@@ -1,5 +1,5 @@
 <template>
-  <div class="w-50">
+  <div class="w-100 container">
     <el-form 
       :model="dynamicValidateForm" 
       ref="dynamicValidateForm" 
@@ -16,10 +16,10 @@
           :rules="{ required: true, message: '商品名稱不可為空', trigger: 'blur'}"
           class="mb-4"
         >
-          <el-col :span="20">
+          <el-col :span="22">
             <el-input v-model="orderItem.name"></el-input>
           </el-col>
-          <el-col :span="4">
+          <el-col :span="2">
             <el-button 
               v-if="index === 0"
               @click="addOrder"
@@ -27,6 +27,7 @@
 
             <el-button 
               v-else
+              type="danger"
               @click.prevent="removeOrder(orderItem)"
             >删除</el-button>
           </el-col>

@@ -1,6 +1,15 @@
 <template>
   <nav id="navbar">
     Navbar
+
+    <div 
+      class="burger" 
+      @click="updateOrderTabDrawer(true)"
+    >
+      <span>
+        <i class="el-icon-s-operation"></i>
+      </span>
+    </div>
     <div class="logout-btn">
       <div
         v-if="nowRoute !== 'Login'" 
@@ -18,7 +27,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 export default {
   name: 'Navbar',
   data() {
@@ -30,6 +39,9 @@ export default {
     ]),
   },
   methods: {
+    ...mapActions([
+      'updateOrderTabDrawer',
+    ]),
     loginout() {
       const vm = this;
       localStorage.removeItem('token', 'ImLogin');
@@ -48,11 +60,19 @@ export default {
     color: #fff;
     height: 50px;
     font-size: 1.2rem;
+    .burger,
     .logout-btn {
       position: absolute;
-      right: 0;
+      padding: 10px;
       cursor: pointer;
       z-index: 1;
+    }
+    .burger {
+      left: 0;
+      font-size: 1.5rem;
+    }
+    .logout-btn {
+      right: 0;
     }
   }
 </style>

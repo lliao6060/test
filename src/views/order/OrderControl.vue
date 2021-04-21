@@ -1,6 +1,6 @@
 <template>
   <div class="row no-gutters w-100">
-    <div class="col-4 box order-status-panel">
+    <div class="col-3 box order-status-panel">
       <div class="order-filter">
         <span slot="label">訂單狀態：</span>
         <el-select 
@@ -16,7 +16,7 @@
         </el-select>
       </div>
     </div>
-    <div class="w-100 col">
+    <div class="w-100 col mt-2">
       <p
         v-if="selectOrders.length > 0" 
         class="text-right"
@@ -45,6 +45,7 @@
             class="row no-gutters sub-order-card"
           >
             <input 
+              v-if="showCheckbox"
               type="checkbox" 
               v-model="selectOrders"
               :id="`orderItem${index}`"
@@ -108,12 +109,17 @@
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex';
 export default {
   name: 'OrderControl',
   props: {
     data: {
       type: Array,
       default: () => [],
+    },
+    showCheckbox: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -129,22 +135,30 @@ export default {
     };
   },
   computed: {
+    ...mapState([
+      'dataList'
+    ]),
     inProgressOrders() {
       const vm = this;
-      const result = vm.data.filter(function (order) {
+      const data = vm.dataList.length > 0 ? vm.dataList : vm.data;
+      const result = data.filter(function (order) {
         return order.status.code === 1 || order.status.code === 2;
       })
       return result;
     },
     isComplate() {
       const vm = this;
-      const result = vm.data.filter(function (order) {
+      const data = vm.dataList.length > 0 ? vm.dataList : vm.data;
+      const result = data.filter(function (order) {
         return order.status.code === 3 || order.status.code === 4;
       })
       return result;
     },
   },
   methods: {
+    ...mapActions([
+      'updateDataList',
+    ]),
     changeOrderState() {
       const vm = this;
       const targetOrders = vm.selectOrders.map(function(order) {
@@ -158,12 +172,13 @@ export default {
           date: order.date,
         };
       });
+      vm.data = [...vm.data, ...targetOrders];
+      vm.updateDataList(vm.data);
       vm.selectOrders.forEach(function(order) {
         const orderIndex = vm.data.indexOf(order);
         vm.data.splice(orderIndex, 1);
       })
       vm.selectOrders = [];
-      vm.data = [...vm.data, ...targetOrders]
     },
   },
 }

@@ -5,11 +5,15 @@
       placeholder="請輸入訂單名稱/出貨日"
       clearable
     ></el-input>
-    <order-control :data="filteredOrders" />
+    <order-control 
+      :data="filteredOrders" 
+      :showCheckbox="false"
+    />
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import OrderControl from './OrderControl.vue';
 export default {
   props: {
@@ -27,10 +31,13 @@ export default {
     };
   },
   computed: {
+    ...mapState([
+      'dataList',
+    ]),
     filteredOrders() {
         const vm = this;
         const search = vm.search;
-        const result = vm.data.filter(function (order) {
+        const result = vm.dataList.filter(function (order) {
         let name = !search || String(order.name).toLowerCase().includes(search.toLowerCase());
         let date = !search || order.date.toLowerCase().includes(search.toLowerCase());
         return name || date;
@@ -42,10 +49,10 @@ export default {
 </script>
 
 <style lang="scss">
-.order-search {
-  .order-status-panel {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-}
+// .order-search {
+//   .order-status-panel {
+//     flex: 0 0 100%;
+//     max-width: 100%;
+//   }
+// }
 </style>
