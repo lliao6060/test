@@ -40,7 +40,7 @@ export default {
         const data = vm.data;
         const result = data.filter(function (order) {
         let name = !search || String(order.name).toLowerCase().includes(search.toLowerCase());
-        let date = !search || order.date.toLowerCase().includes(search.toLowerCase());
+        let date = !search || String(order.date).toLowerCase().includes(search.toLowerCase());
         return name || date;
       })
       return result;

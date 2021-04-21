@@ -23,13 +23,13 @@
             <el-button 
               v-if="index === 0"
               @click="addOrder"
-            >新增</el-button>
+            >＋</el-button>
 
             <el-button 
               v-else
               type="danger"
               @click.prevent="removeOrder(orderItem)"
-            >删除</el-button>
+            >Ｘ</el-button>
           </el-col>
         </el-form-item>
 
@@ -81,8 +81,8 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="submitForm('dynamicValidateForm')">提交</el-button>
-        <el-button @click="resetForm('dynamicValidateForm')">重置</el-button>
+        <el-button type="primary" @click="submitForm('dynamicValidateForm')">新增</el-button>
+        <el-button @click="resetForm('dynamicValidateForm')">重置表單</el-button>
       </el-form-item>
 
     </el-form>
