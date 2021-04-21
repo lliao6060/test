@@ -95,8 +95,7 @@
           if (valid) {
             vm.login();
           } else {
-            vm.$message.error();
-            ('請確認未填寫表單!');
+            vm.$message.error('請確認未填寫表單!');
             return false;
           }
         });

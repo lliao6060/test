@@ -109,7 +109,6 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
 export default {
   name: 'OrderControl',
   props: {
@@ -124,9 +123,9 @@ export default {
   },
   data() {
     return {
+      selectOrders: [],
       options: [0, 1, 2],
       nowOrderStatus: 0,
-      selectOrders: [],
 
       //config
       orderStatusText: ['處理中','已成立','已取消','已送達'],
@@ -135,12 +134,9 @@ export default {
     };
   },
   computed: {
-    ...mapState([
-      'dataList'
-    ]),
     inProgressOrders() {
       const vm = this;
-      const data = vm.dataList.length > 0 ? vm.dataList : vm.data;
+      const data = vm.data;
       const result = data.filter(function (order) {
         return order.status.code === 1 || order.status.code === 2;
       })
@@ -148,7 +144,7 @@ export default {
     },
     isComplate() {
       const vm = this;
-      const data = vm.dataList.length > 0 ? vm.dataList : vm.data;
+      const data = vm.data;
       const result = data.filter(function (order) {
         return order.status.code === 3 || order.status.code === 4;
       })
@@ -156,9 +152,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions([
-      'updateDataList',
-    ]),
     changeOrderState() {
       const vm = this;
       const targetOrders = vm.selectOrders.map(function(order) {
@@ -172,12 +165,8 @@ export default {
           date: order.date,
         };
       });
-      vm.data = [...vm.data, ...targetOrders];
-      vm.updateDataList(vm.data);
-      vm.selectOrders.forEach(function(order) {
-        const orderIndex = vm.data.indexOf(order);
-        vm.data.splice(orderIndex, 1);
-      })
+      vm.$emit('change', [...vm.data, ...targetOrders]);
+      vm.$emit('slice', vm.selectOrders);
       vm.selectOrders = [];
     },
   },

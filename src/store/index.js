@@ -12,9 +12,11 @@ export default new Vuex.Store({
       value: 'control',
     },
     newOrders: [],
-    dataList: [],
   },
   mutations: {
+    updateNowRoute(state, routeName) {
+      state.nowRoute = routeName;
+    },
     updateOrderTabDrawer(state, bool) {
       state.orderTabDrawer = bool;
     },
@@ -24,11 +26,11 @@ export default new Vuex.Store({
     updateNewOrderData(state, newData) {
       state.newOrders = newData;
     },
-    updateDataList(state, newData) {
-      state.dataList = newData;
-    },
   },
   actions: {
+    updateNowRoute({ commit }, routeName) {
+      commit('updateNowRoute', routeName)
+    },
     updateOrderTabDrawer({ commit }, bool) {
       commit('updateOrderTabDrawer', bool);
     },
@@ -37,9 +39,6 @@ export default new Vuex.Store({
     },
     updateNewOrderData({ commit }, newData) {
       commit('updateNewOrderData', newData);
-    },
-    updateDataList({ commit }, newData) {
-      commit('updateDataList', newData);
     },
 
   },

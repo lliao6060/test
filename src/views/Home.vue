@@ -6,6 +6,8 @@
           <order-control 
             v-if="orderNowTab.value === 'control'" 
             :data="orderList.orders"
+            @change="changeOrder"
+            @slice="sliceOrder"
           />
 
           <add-order v-if="orderNowTab.value === 'add'"/>
@@ -148,6 +150,18 @@
         vm.orderList = {
           orders: [...vm.orderList.orders, ...vm.newOrders]
         };
+      },
+      changeOrder(newOrders) {
+        const vm = this;
+        vm.orderList.orders = newOrders;
+      },
+      sliceOrder(selectOrders) {
+        const vm = this;
+          selectOrders.forEach(function(order) {
+          const orderIndex = vm.orderList.orders.indexOf(order);
+          console.log(orderIndex)
+          vm.orderList.orders.splice(orderIndex, 1);
+        })
       },
       changeTab(tabName) {
         const vm = this;

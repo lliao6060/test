@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import Navbar from './components/NavBar.vue';
 export default {
   components: {
@@ -26,10 +27,15 @@ export default {
   },
   watch: {
     $route(nV) {
-      this.nowRoute = nV.name;
-      console.log(this.nowRoute)
+      this.updateNowRoute(nV.name);
+      // console.log(this.nowRoute)
       // console.log(this.$store.state.nowRoute);
     }
+  },
+  methods: {
+    ...mapActions([
+      'updateNowRoute',
+    ])
   },
 }
 </script>
